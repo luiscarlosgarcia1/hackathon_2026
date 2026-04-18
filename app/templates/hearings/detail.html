@@ -103,6 +103,43 @@
 
 <div id="cy-tooltip" class="cy-tooltip" style="display:none"></div>
 
+<section class="decision-section dark-panel">
+  <h2>Government Decision</h2>
+  <form id="decision-form">
+    <div class="decision-form-body">
+      <label for="decision-text">Decision text</label>
+      <textarea id="decision-text" rows="4" placeholder="Enter the government's final decision…">{{ decision.decision_text if decision else '' }}</textarea>
+      <div class="decision-form-row">
+        <label for="decision-date">Decision date <span class="decision-date-hint">(optional)</span></label>
+        <input type="date" id="decision-date" value="{{ decision.decision_date if decision and decision.decision_date else '' }}">
+      </div>
+    </div>
+    <div class="decision-form-footer">
+      <button type="submit" class="btn btn-sm">Save Decision</button>
+      <span id="decision-status" class="decision-status"></span>
+    </div>
+  </form>
+</section>
+
+<section class="accountability-section dark-panel">
+  <div class="accountability-header">
+    <h2>Accountability</h2>
+    {% if decision %}
+    <button class="btn btn-sm" id="run-accountability-btn" onclick="runAccountability({{ hearing.id }}, this)">Run Accountability Analysis</button>
+    {% endif %}
+  </div>
+  <div id="accountability-result">
+    {% if accountability %}
+    <div class="alignment-badge alignment-{{ accountability.alignment }}">{{ accountability.alignment | upper }}</div>
+    <p class="accountability-reasoning">{{ accountability.reasoning }}</p>
+    {% elif not decision %}
+    <p class="empty-state">Save a government decision above to enable accountability analysis.</p>
+    {% else %}
+    <p class="empty-state">No analysis yet — click Run Accountability Analysis.</p>
+    {% endif %}
+  </div>
+</section>
+
 <script>
 var CLUSTER_DATA = {{ clusters | map(attribute='to_dict') | list | tojson }};
 {% if clusters %}
@@ -314,6 +351,75 @@ function resummarize(hearingId, btn) {
   fetch('/api/hearings/' + hearingId + '/summarize', { method: 'POST' })
     .then(function(r) { location.reload(); })
     .catch(function() { btn.disabled = false; btn.textContent = 'Re-summarize'; });
+}
+
+document.getElementById('decision-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var hearingId = {{ hearing.id }};
+  var text = document.getElementById('decision-text').value.trim();
+  var dateVal = document.getElementById('decision-date').value;
+  var statusEl = document.getElementById('decision-status');
+  var btn = this.querySelector('button[type="submit"]');
+  if (!text) { statusEl.textContent = 'Decision text is required.'; statusEl.className = 'decision-status decision-status--error'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  statusEl.textContent = '';
+  var body = { decision_text: text };
+  if (dateVal) body.decision_date = dateVal;
+  fetch('/api/hearings/' + hearingId + '/decision', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  .then(function(r) {
+    if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Save failed'); });
+    return r.json();
+  })
+  .then(function() {
+    btn.disabled = false;
+    btn.textContent = 'Save Decision';
+    statusEl.textContent = 'Saved.';
+    statusEl.className = 'decision-status decision-status--ok';
+    var runBtn = document.getElementById('run-accountability-btn');
+    if (!runBtn) {
+      var header = document.querySelector('.accountability-header');
+      var newBtn = document.createElement('button');
+      newBtn.className = 'btn btn-sm';
+      newBtn.id = 'run-accountability-btn';
+      newBtn.textContent = 'Run Accountability Analysis';
+      newBtn.onclick = function() { runAccountability(hearingId, newBtn); };
+      header.appendChild(newBtn);
+      var emptyState = document.querySelector('#accountability-result .empty-state');
+      if (emptyState) emptyState.textContent = 'No analysis yet — click Run Accountability Analysis.';
+    }
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btn.textContent = 'Save Decision';
+    statusEl.textContent = err.message;
+    statusEl.className = 'decision-status decision-status--error';
+  });
+});
+
+function runAccountability(hearingId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Analyzing…';
+  fetch('/api/hearings/' + hearingId + '/accountability', { method: 'POST' })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Analysis failed'); });
+      return r.json();
+    })
+    .then(function(data) {
+      btn.disabled = false;
+      btn.textContent = 'Run Accountability Analysis';
+      var result = document.getElementById('accountability-result');
+      result.innerHTML = '<div class="alignment-badge alignment-' + data.alignment + '">' + data.alignment.toUpperCase() + '</div><p class="accountability-reasoning">' + data.reasoning + '</p>';
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = 'Run Accountability Analysis';
+      alert(err.message);
+    });
 }
 
 function runClustering(hearingId, btn) {

@@ -15,6 +15,8 @@ class Hearing(db.Model):
     summary = db.relationship("HearingSummary", backref="hearing", uselist=False)
     comments = db.relationship("PublicComment", backref="hearing", lazy="dynamic")
     clusters = db.relationship("CommentCluster", backref="hearing", lazy="dynamic")
+    decision = db.relationship("GovernmentDecision", backref="hearing", uselist=False)
+    accountability = db.relationship("AccountabilitySummary", backref="hearing", uselist=False)
 
     def to_dict(self):
         return {

@@ -35,6 +35,8 @@ def hearing_detail(hearing_id):
         comments=comments,
         clusters=clusters,
         comment_error=None,
+        decision=hearing.decision,
+        accountability=hearing.accountability,
     )
 
 
@@ -54,6 +56,8 @@ def submit_comment(hearing_id):
             comments=comments,
             clusters=clusters,
             comment_error="Comment cannot be empty.",
+            decision=hearing.decision,
+            accountability=hearing.accountability,
         )
     create_comment(hearing_id, body)
     return redirect(url_for("web.hearing_detail", hearing_id=hearing_id))
