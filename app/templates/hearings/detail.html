@@ -84,7 +84,18 @@
     <button class="btn btn-sm" onclick="runClustering({{ hearing.id }}, this)">Cluster Comments</button>
   </div>
   {% if clusters %}
-  <div id="cy" class="cy-container"></div>
+  <div class="cy-wrapper">
+    <div id="cy" class="cy-container"></div>
+    <div id="cluster-panel" class="cluster-panel">
+      <div class="cluster-panel-header">
+        <span id="panel-name" class="cluster-panel-name"></span>
+        <button class="cluster-panel-close" id="panel-close">×</button>
+      </div>
+      <p id="panel-description" class="cluster-panel-description"></p>
+      <hr class="cluster-panel-divider">
+      <ul id="panel-comments" class="cluster-panel-comments"></ul>
+    </div>
+  </div>
   {% else %}
   <p class="empty-state">No clusters yet — submit at least 2 comments and click Cluster Comments.</p>
   {% endif %}
@@ -116,7 +127,7 @@ allComments.forEach(function(c) {
 
   CLUSTER_DATA.forEach(function(cl, i) {
     elements.push({
-      data: { id: 'c' + cl.id, label: cl.name, type: 'cluster', color: clusterColors[i % clusterColors.length] }
+      data: { id: 'c' + cl.id, label: cl.name, description: cl.description, comments: cl.comments, type: 'cluster', color: clusterColors[i % clusterColors.length], comment_count: cl.comment_count || 1 }
     });
     cl.comments.forEach(function(comment) {
       elements.push({
@@ -136,24 +147,30 @@ allComments.forEach(function(c) {
         selector: 'node[type="cluster"]',
         style: {
           'background-color': 'data(color)',
+          'background-opacity': 0.8,
           'label': 'data(label)',
-          'width': 60,
-          'height': 60,
-          'font-size': 11,
+          'width': 'mapData(comment_count, 1, 20, 40, 120)',
+          'height': 'mapData(comment_count, 1, 20, 40, 120)',
+          'font-size': 12,
           'color': '#fff',
           'text-valign': 'center',
           'text-halign': 'center',
           'text-wrap': 'wrap',
-          'text-max-width': 55,
-          'font-weight': 'bold'
+          'text-max-width': 'mapData(comment_count, 1, 20, 36, 110)',
+          'font-weight': 'bold',
+          'shadow-blur': 18,
+          'shadow-color': 'data(color)',
+          'shadow-opacity': 0.7,
+          'shadow-offset-x': 0,
+          'shadow-offset-y': 0
         }
       },
       {
         selector: 'node[type="comment"]',
         style: {
-          'background-color': '#bbb',
-          'width': 18,
-          'height': 18,
+          'background-color': '#4a4a5a',
+          'width': 16,
+          'height': 16,
           'label': ''
         }
       },
@@ -161,12 +178,40 @@ allComments.forEach(function(c) {
         selector: 'edge',
         style: {
           'width': 1,
-          'line-color': '#ccc',
-          'curve-style': 'bezier'
+          'line-color': '#2a2a3a',
+          'curve-style': 'haystack'
+        }
+      },
+      {
+        selector: 'node.dimmed, edge.dimmed',
+        style: { 'opacity': 0.15 }
+      },
+      {
+        selector: 'node[type="cluster"].highlighted',
+        style: {
+          'shadow-blur': 32,
+          'background-opacity': 1
+        }
+      },
+      {
+        selector: 'node[type="cluster"].selected',
+        style: {
+          'border-width': 3,
+          'border-color': '#fff',
+          'border-opacity': 0.9
         }
       }
     ],
-    layout: { name: 'cose', animate: false, nodeRepulsion: 8000, idealEdgeLength: 80 }
+    layout: {
+      name: 'cose',
+      animate: true,
+      animationDuration: 600,
+      nodeRepulsion: 12000,
+      idealEdgeLength: 100,
+      gravity: 0.25,
+      fit: true,
+      padding: 40
+    }
   });
 
   var tooltip = document.getElementById('cy-tooltip');
@@ -186,6 +231,77 @@ allComments.forEach(function(c) {
 
   cy.on('mouseout', 'node[type="comment"]', function() {
     tooltip.style.display = 'none';
+  });
+
+  cy.on('mouseover', 'node[type="cluster"]', function(evt) {
+    var node = evt.target;
+    cy.container().style.cursor = 'pointer';
+    cy.batch(function() {
+      cy.elements().addClass('dimmed');
+      node.closedNeighborhood().removeClass('dimmed');
+      node.addClass('highlighted');
+    });
+  });
+
+  cy.on('mouseout', 'node[type="cluster"]', function() {
+    cy.container().style.cursor = 'default';
+    cy.batch(function() {
+      cy.elements().removeClass('dimmed').removeClass('highlighted');
+    });
+  });
+
+  window.addEventListener('resize', function() {
+    cy.resize();
+    cy.fit();
+  });
+
+  var panel = document.getElementById('cluster-panel');
+  var panelName = document.getElementById('panel-name');
+  var panelDesc = document.getElementById('panel-description');
+  var panelComments = document.getElementById('panel-comments');
+  var selectedNode = null;
+
+  function openPanel(node) {
+    panelName.textContent = node.data('label');
+    panelDesc.textContent = node.data('description') || '';
+    var comments = node.data('comments') || [];
+    panelComments.innerHTML = '';
+    comments.forEach(function(c) {
+      var li = document.createElement('li');
+      li.textContent = c.body;
+      panelComments.appendChild(li);
+    });
+    if (selectedNode) selectedNode.removeClass('selected');
+    selectedNode = node;
+    node.addClass('selected');
+    panel.classList.add('cluster-panel--open');
+    cy.animate({ fit: { eles: node, padding: 80 } }, { duration: 400 });
+  }
+
+  function closePanel() {
+    panel.classList.remove('cluster-panel--open');
+    if (selectedNode) {
+      selectedNode.removeClass('selected');
+      selectedNode = null;
+    }
+  }
+
+  cy.on('tap', 'node[type="cluster"]', function(evt) {
+    openPanel(evt.target);
+  });
+
+  cy.on('tap', 'node[type="comment"]', function(evt) {
+    evt.stopPropagation();
+  });
+
+  cy.on('tap', function(evt) {
+    if (evt.target === cy) closePanel();
+  });
+
+  document.getElementById('panel-close').addEventListener('click', closePanel);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePanel();
   });
 })();
 </script>

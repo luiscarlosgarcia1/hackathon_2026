@@ -21,8 +21,8 @@ class CommentCluster(db.Model):
     def comment_count(self):
         return len(self.comments)
 
-    def to_dict(self):
-        return {
+    def to_dict(self, include_comments=False):
+        d = {
             "id": self.id,
             "hearing_id": self.hearing_id,
             "name": self.name,
@@ -31,3 +31,6 @@ class CommentCluster(db.Model):
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
+        if include_comments:
+            d["comments"] = [c.to_dict() for c in self.comments]
+        return d

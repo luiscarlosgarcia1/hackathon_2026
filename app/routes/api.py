@@ -1,5 +1,9 @@
 from datetime import date as date_type
 from flask import Blueprint, jsonify, request
+from sqlalchemy.orm import joinedload
+from app import db
+from app.models.hearing import Hearing
+from app.models.comment_cluster import CommentCluster
 from app.services.hearing_service import create_hearing, get_hearing, list_hearings
 from app.services.summary_orchestrator import run_summary
 from app.services.comment_service import create_comment
@@ -56,6 +60,20 @@ def create_comment_route(hearing_id):
     except ValueError:
         return jsonify({"error": "Not found"}), 404
     return jsonify(comment.to_dict()), 201
+
+
+@api_bp.route("/hearings/<int:hearing_id>/clusters", methods=["GET"])
+def get_clusters(hearing_id):
+    hearing = db.session.get(Hearing, hearing_id)
+    if hearing is None:
+        return jsonify({"error": "Not found"}), 404
+    clusters = (
+        db.session.query(CommentCluster)
+        .options(joinedload(CommentCluster.comments))
+        .filter_by(hearing_id=hearing_id)
+        .all()
+    )
+    return jsonify([c.to_dict(include_comments=True) for c in clusters]), 200
 
 
 @api_bp.route("/hearings/<int:hearing_id>/cluster", methods=["POST"])
