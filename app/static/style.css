@@ -115,3 +115,52 @@ td a { color: #1a3a5c; }
 .flash-success { background: #e8f5e9; border: 1px solid #81c784; color: #1b5e20; }
 
 .empty-state { color: #888; font-style: italic; }
+
+.summary-section { margin-bottom: 2rem; }
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.summary-header h2 { margin: 0; }
+
+.btn-sm {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.summary-card {
+  background: #fff;
+  border: 1px solid #dde3ea;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+}
+
+.summary-card-label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #1a3a5c;
+  margin-bottom: 0.4rem;
+}
+
+.summary-card-body {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.summary-pending { margin-top: 0.5rem; }
+
+@media (max-width: 540px) {
+  .summary-grid { grid-template-columns: 1fr; }
+}

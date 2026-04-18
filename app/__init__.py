@@ -11,7 +11,7 @@ def create_app(config):
     db.init_app(app)
 
     with app.app_context():
-        from app.models import hearing  # noqa: F401 — ensures model is registered
+        from app.models import hearing, hearing_summary  # noqa: F401 — ensures models are registered
         db.create_all()
 
         from app.routes.web import web_bp
