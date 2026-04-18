@@ -10,6 +10,7 @@ class Hearing(db.Model):
     date = db.Column(db.Date, nullable=False)
     transcript = db.Column(db.Text, nullable=True)
     agenda = db.Column(db.Text, nullable=True)
+    youtube_video_id = db.Column(db.String(50), nullable=True, unique=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     summary = db.relationship("HearingSummary", backref="hearing", uselist=False)
 
@@ -20,5 +21,6 @@ class Hearing(db.Model):
             "date": self.date.isoformat(),
             "transcript": self.transcript,
             "agenda": self.agenda,
+            "youtube_video_id": self.youtube_video_id,               
             "created_at": self.created_at.isoformat(),
         }
