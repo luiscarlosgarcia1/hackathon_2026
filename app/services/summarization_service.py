@@ -3,7 +3,8 @@ import os
 
 from openai import OpenAI
 
-SUMMARIZATION_MODEL = os.environ.get("SUMMARIZATION_MODEL", "codex-mini-latest")
+SUMMARIZATION_MODEL = os.environ.get("SUMMARIZATION_MODEL", "llama3.2")
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 
 SYSTEM_PROMPT = """You are a civic-affairs analyst. Given a legislative hearing, return a JSON object with exactly these four keys:
 - issue_description: a concise 1-3 sentence description of the central issue being addressed
@@ -23,7 +24,7 @@ def summarize_hearing(hearing) -> dict:
 
     user_content = "\n\n".join(parts)
 
-    client = OpenAI()
+    client = OpenAI(base_url=OLLAMA_BASE_URL, api_key="ollama")
     response = client.chat.completions.create(
         model=SUMMARIZATION_MODEL,
         messages=[
