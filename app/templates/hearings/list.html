@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Hearings — CivicLens{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Public Hearings</h1>
+  <a class="btn" href="{{ url_for('web.new_hearing') }}">+ Submit a Hearing</a>
+</div>
+
+{% if hearings %}
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for hearing in hearings %}
+    <tr>
+      <td>{{ hearing.title }}</td>
+      <td>{{ hearing.date }}</td>
+      <td><a href="{{ url_for('web.hearing_detail', hearing_id=hearing.id) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-state">No hearings yet. <a href="{{ url_for('web.new_hearing') }}">Submit the first one.</a></p>
+{% endif %}
+{% endblock %}

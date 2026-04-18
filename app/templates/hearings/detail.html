@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ hearing.title }} — CivicLens{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('web.list_hearings') }}">&larr; All Hearings</a>
+<h1>{{ hearing.title }}</h1>
+<p class="meta">Date: {{ hearing.date }}</p>
+
+{% if hearing.agenda %}
+<section>
+  <h2>Agenda</h2>
+  <pre class="content-block">{{ hearing.agenda }}</pre>
+</section>
+{% endif %}
+
+{% if hearing.transcript %}
+<section>
+  <h2>Transcript</h2>
+  <pre class="content-block">{{ hearing.transcript }}</pre>
+</section>
+{% endif %}
+
+{% if not hearing.agenda and not hearing.transcript %}
+<p class="empty-state">No agenda or transcript available for this hearing.</p>
+{% endif %}
+{% endblock %}

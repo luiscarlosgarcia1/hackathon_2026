@@ -1,6 +1,30 @@
 # hackathon_2026
 Project built during Hackathon 2026, focused on rapid prototyping, collaboration, and delivering a functional solution under time constraints.
 
+## Quick Start
+
+```bash
+# 1. Create and activate a virtual environment
+python3 -m venv .venv && source .venv/bin/activate
+
+# 2. Install dependencies
+make install
+
+# 3. Seed the database with sample hearings
+make seed
+
+# 4. Start the development server
+make run
+```
+
+Open [http://localhost:5000](http://localhost:5000) in your browser.
+
+To run the test suite:
+
+```bash
+make test
+```
+
 ## Project Vision
 
 This project is centered on civic engagement and public accessibility. The core idea is to help everyday people stay informed about government decisions that may affect their lives without requiring them to attend long public hearings, watch full meeting recordings, or read through large amounts of difficult public material. Many people care about local and regional issues, but they often do not have the time, energy, or background knowledge to follow the full civic process closely. This project is designed to reduce that barrier and make civic participation easier, faster, and more understandable.

@@ -1,2 +1,38 @@
-/.venv
-/CLAUDE.md
+# Virtual environment
+.venv/
+
+# Claude Code
+CLAUDE.md
+
+# Environment variables
+.env
+
+# SQLite databases
+*.db
+instance/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
