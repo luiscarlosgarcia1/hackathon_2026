@@ -62,20 +62,21 @@ Public comments can be submitted against a hearing. An AI agent groups them into
 
 ---
 
-## Phase 4: 3D Brain-Map Visualization
+## Phase 4: Brain-Map Visualization via Obsidian Sync
 
-**User stories**: As a community member, I want to explore public opinion visually in 3D space so that I can quickly grasp the shape and intensity of community sentiment.
+**User stories**: As a community member, I want to explore public opinion as a visual graph so that I can quickly grasp the shape and intensity of community sentiment.
 
 ### What to build
 
-The comment clusters are rendered as an interactive 3D spatial visualization. Clusters appear as nodes positioned by theme proximity. Users can navigate the space, select a cluster to see its theme, and drill into individual comments within it.
+After clustering, the backend pushes each hearing and its comment clusters to Obsidian as linked notes via the [Obsidian Local REST API plugin](https://github.com/coddingtonbear/obsidian-local-rest-api). Obsidian's built-in graph view renders the brain map — hearings as root nodes, clusters as child nodes linked by theme. No custom renderer needed.
 
 ### Acceptance criteria
 
-- [ ] Comment clusters are rendered as navigable 3D nodes
-- [ ] Node size or intensity reflects comment volume
-- [ ] Selecting a cluster reveals its theme label and comment list
-- [ ] Visualization loads from the hearing detail page
+- [ ] Each hearing is created as a note in Obsidian on ingestion
+- [ ] Each comment cluster is created as a linked note under its hearing
+- [ ] Links between notes reflect theme relationships so Obsidian graph view shows the correct structure
+- [ ] Sync can be re-triggered when clusters are updated
+- [ ] The hearing detail page links out to the Obsidian note for that hearing
 
 ---
 
