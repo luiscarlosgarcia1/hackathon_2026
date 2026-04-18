@@ -25,7 +25,7 @@ def hearing_detail(hearing_id):
     hearing = get_hearing(hearing_id)
     if hearing is None:
         abort(404)
-    return render_template("hearings/detail.html", hearing=hearing)
+    return render_template("hearings/detail.html", hearing=hearing, summary=hearing.summary)
 
 
 @web_bp.route("/hearings/new", methods=["GET", "POST"])

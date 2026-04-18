@@ -11,6 +11,7 @@ class Hearing(db.Model):
     transcript = db.Column(db.Text, nullable=True)
     agenda = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    summary = db.relationship("HearingSummary", backref="hearing", uselist=False)
 
     def to_dict(self):
         return {

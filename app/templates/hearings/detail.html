@@ -6,6 +6,35 @@
 <h1>{{ hearing.title }}</h1>
 <p class="meta">Date: {{ hearing.date }}</p>
 
+<section class="summary-section">
+  <div class="summary-header">
+    <h2>Summary</h2>
+    <button class="btn btn-sm" onclick="resummarize({{ hearing.id }}, this)">Re-summarize</button>
+  </div>
+  {% if summary %}
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-card-label">Issue</div>
+      <div class="summary-card-body">{{ summary.issue_description }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Stakeholders</div>
+      <div class="summary-card-body">{{ summary.stakeholders }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Key Arguments</div>
+      <div class="summary-card-body">{{ summary.key_arguments }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Community Impact</div>
+      <div class="summary-card-body">{{ summary.community_impact }}</div>
+    </div>
+  </div>
+  {% else %}
+  <p class="empty-state summary-pending">Summary pending...</p>
+  {% endif %}
+</section>
+
 {% if hearing.agenda %}
 <section>
   <h2>Agenda</h2>
@@ -23,4 +52,14 @@
 {% if not hearing.agenda and not hearing.transcript %}
 <p class="empty-state">No agenda or transcript available for this hearing.</p>
 {% endif %}
+
+<script>
+function resummarize(hearingId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Running…';
+  fetch('/api/hearings/' + hearingId + '/summarize', { method: 'POST' })
+    .then(function(r) { location.reload(); })
+    .catch(function() { btn.disabled = false; btn.textContent = 'Re-summarize'; });
+}
+</script>
 {% endblock %}

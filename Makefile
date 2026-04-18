@@ -4,7 +4,7 @@ install:
 	pip install -r requirements.txt
 
 run:
-	FLASK_APP=run.py flask run
+	ollama serve & OLLAMA_PID=$$!; trap "kill $$OLLAMA_PID" EXIT; sleep 2 && FLASK_APP=run.py flask run
 
 test:
 	pytest tests/ -v
