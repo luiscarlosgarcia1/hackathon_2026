@@ -2,9 +2,11 @@ import logging
 import threading
 
 from flask import Flask
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+migrate = Migrate()
 logger = logging.getLogger(__name__)
 
 
@@ -13,9 +15,10 @@ def create_app(config):
     app.config.from_object(config)
 
     db.init_app(app)
+    migrate.init_app(app, db)
 
     with app.app_context():
-        from app.models import hearing, hearing_summary  # noqa: F401 — ensures models are registered
+        from app.models import Hearing, HearingSummary, CommentCluster, PublicComment  # noqa: F401
         db.create_all()
 
         from app.routes.web import web_bp

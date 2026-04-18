@@ -5,6 +5,7 @@ from app.services.hearing_service import (
     get_hearing,
     list_hearings as fetch_hearings,
 )
+from app.services.comment_service import create_comment
 
 web_bp = Blueprint("web", __name__)
 
@@ -25,7 +26,37 @@ def hearing_detail(hearing_id):
     hearing = get_hearing(hearing_id)
     if hearing is None:
         abort(404)
-    return render_template("hearings/detail.html", hearing=hearing, summary=hearing.summary)
+    comments = hearing.comments.order_by("created_at").all()
+    clusters = hearing.clusters.all()
+    return render_template(
+        "hearings/detail.html",
+        hearing=hearing,
+        summary=hearing.summary,
+        comments=comments,
+        clusters=clusters,
+        comment_error=None,
+    )
+
+
+@web_bp.route("/hearings/<int:hearing_id>/comments", methods=["POST"])
+def submit_comment(hearing_id):
+    hearing = get_hearing(hearing_id)
+    if hearing is None:
+        abort(404)
+    body = request.form.get("body", "").strip()
+    if not body:
+        comments = hearing.comments.order_by("created_at").all()
+        clusters = hearing.clusters.all()
+        return render_template(
+            "hearings/detail.html",
+            hearing=hearing,
+            summary=hearing.summary,
+            comments=comments,
+            clusters=clusters,
+            comment_error="Comment cannot be empty.",
+        )
+    create_comment(hearing_id, body)
+    return redirect(url_for("web.hearing_detail", hearing_id=hearing_id))
 
 
 @web_bp.route("/hearings/new", methods=["GET", "POST"])

@@ -157,24 +157,28 @@ Acceptance:
 
 **What to build**
 
-The clusters section on the hearing detail page: browsable theme list with comment drill-down and a trigger button.
+The clusters section on the hearing detail page: an interactive graph visualization using **cytoscape.js** (loaded via CDN, no build step) showing cluster nodes connected to their comment nodes.
 
 Files to touch:
 - `app/routes/web.py` — pass `hearing.clusters` (with `.comments`) to the detail template
-- `app/templates/hearings/detail.html` — add clusters panel below the comment list
-- `app/static/style.css` — style cluster cards and expandable comment lists
+- `app/templates/hearings/detail.html` — add clusters graph panel below the comment list; include cytoscape.js CDN script
+- `app/static/style.css` — style the graph container and tooltip
 
 UI spec:
 - A "Cluster Comments" button that posts to `/api/hearings/<id>/cluster` and reloads the page
 - If no clusters exist: show "No clusters yet — submit at least 2 comments and click Cluster Comments."
-- Each cluster renders as a card: **name** (bold), description (muted), comment count badge
-- Each card has a disclosure toggle ("Show comments / Hide comments") that expands an indented list of comment bodies
-- Cluster cards are ordered by comment count descending (most comments first)
+- Graph renders in a `<div>` with a fixed height (e.g. 400px)
+- Cluster nodes: large, colored circles labeled with the cluster name
+- Comment nodes: small grey circles connected to their cluster node
+- Hovering a comment node shows a tooltip with the comment body
+- Cluster nodes are laid out with `cose` (force-directed) layout
+- Data is passed from Flask as a JSON blob in a `<script>` tag — no extra API call needed
 
 Acceptance:
-- [ ] Clusters render on the hearing detail page after clustering runs
-- [ ] Each cluster card shows name, description, and comment count
-- [ ] Comment list inside each cluster is togglable (expand/collapse)
-- [ ] "Cluster Comments" button triggers the API and the page reloads with updated clusters
+- [ ] Graph renders on the hearing detail page after clustering runs
+- [ ] Each cluster node is visually distinct and labeled
+- [ ] Comment nodes connect to the correct cluster node
+- [ ] Hovering a comment node shows its body text
+- [ ] "Cluster Comments" button triggers the API and the page reloads with updated graph
 - [ ] Empty state is shown when no clusters exist yet
 - [ ] Layout holds at narrow viewport widths

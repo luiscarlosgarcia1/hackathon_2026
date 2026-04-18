@@ -53,6 +53,144 @@
 <p class="empty-state">No agenda or transcript available for this hearing.</p>
 {% endif %}
 
+<section class="comments-section">
+  <h2>Public Comments</h2>
+  <form class="comment-form" method="POST" action="{{ url_for('web.submit_comment', hearing_id=hearing.id) }}">
+    <label for="comment-body">Add your comment</label>
+    {% if comment_error %}
+    <p class="comment-error">{{ comment_error }}</p>
+    {% endif %}
+    <textarea id="comment-body" name="body" rows="4" placeholder="Share your thoughts on this hearing…"></textarea>
+    <button type="submit" class="btn">Submit</button>
+  </form>
+
+  {% if comments %}
+  <ul class="comment-list">
+    {% for c in comments %}
+    <li class="comment-item">
+      <p class="comment-body">{{ c.body }}</p>
+      <span class="comment-meta">{{ c.created_at.strftime('%b %-d, %Y at %-I:%M %p') }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty-state">No comments yet — be the first.</p>
+  {% endif %}
+</section>
+
+<section class="clusters-section">
+  <div class="clusters-header">
+    <h2>Comment Clusters</h2>
+    <button class="btn btn-sm" onclick="runClustering({{ hearing.id }}, this)">Cluster Comments</button>
+  </div>
+  {% if clusters %}
+  <div id="cy" class="cy-container"></div>
+  {% else %}
+  <p class="empty-state">No clusters yet — submit at least 2 comments and click Cluster Comments.</p>
+  {% endif %}
+</section>
+
+<div id="cy-tooltip" class="cy-tooltip" style="display:none"></div>
+
+<script>
+var CLUSTER_DATA = {{ clusters | map(attribute='to_dict') | list | tojson }};
+{% if clusters %}
+CLUSTER_DATA.forEach(function(cl) { cl.comments = []; });
+var clusterMap = {};
+CLUSTER_DATA.forEach(function(cl) { clusterMap[cl.id] = cl; });
+var allComments = {{ comments | map(attribute='to_dict') | list | tojson }};
+allComments.forEach(function(c) {
+  if (c.cluster_id && clusterMap[c.cluster_id]) {
+    clusterMap[c.cluster_id].comments.push(c);
+  }
+});
+{% endif %}
+</script>
+
+{% if clusters %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.29.2/cytoscape.min.js"></script>
+<script>
+(function() {
+  var clusterColors = ['#1a6fc4','#2e9c5a','#c4781a','#8e44ad','#c0392b','#16a085','#d35400','#2980b9'];
+  var elements = [];
+
+  CLUSTER_DATA.forEach(function(cl, i) {
+    elements.push({
+      data: { id: 'c' + cl.id, label: cl.name, type: 'cluster', color: clusterColors[i % clusterColors.length] }
+    });
+    cl.comments.forEach(function(comment) {
+      elements.push({
+        data: { id: 'cm' + comment.id, label: '', type: 'comment', body: comment.body, parent_cluster: 'c' + cl.id }
+      });
+      elements.push({
+        data: { source: 'c' + cl.id, target: 'cm' + comment.id }
+      });
+    });
+  });
+
+  var cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: elements,
+    style: [
+      {
+        selector: 'node[type="cluster"]',
+        style: {
+          'background-color': 'data(color)',
+          'label': 'data(label)',
+          'width': 60,
+          'height': 60,
+          'font-size': 11,
+          'color': '#fff',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'text-wrap': 'wrap',
+          'text-max-width': 55,
+          'font-weight': 'bold'
+        }
+      },
+      {
+        selector: 'node[type="comment"]',
+        style: {
+          'background-color': '#bbb',
+          'width': 18,
+          'height': 18,
+          'label': ''
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': 1,
+          'line-color': '#ccc',
+          'curve-style': 'bezier'
+        }
+      }
+    ],
+    layout: { name: 'cose', animate: false, nodeRepulsion: 8000, idealEdgeLength: 80 }
+  });
+
+  var tooltip = document.getElementById('cy-tooltip');
+
+  cy.on('mouseover', 'node[type="comment"]', function(evt) {
+    var node = evt.target;
+    tooltip.textContent = node.data('body');
+    tooltip.style.display = 'block';
+  });
+
+  cy.on('mousemove', function(evt) {
+    if (tooltip.style.display === 'block') {
+      tooltip.style.left = (evt.originalEvent.pageX + 12) + 'px';
+      tooltip.style.top = (evt.originalEvent.pageY + 12) + 'px';
+    }
+  });
+
+  cy.on('mouseout', 'node[type="comment"]', function() {
+    tooltip.style.display = 'none';
+  });
+})();
+</script>
+{% endif %}
+
 <script>
 function resummarize(hearingId, btn) {
   btn.disabled = true;
@@ -60,6 +198,23 @@ function resummarize(hearingId, btn) {
   fetch('/api/hearings/' + hearingId + '/summarize', { method: 'POST' })
     .then(function(r) { location.reload(); })
     .catch(function() { btn.disabled = false; btn.textContent = 'Re-summarize'; });
+}
+
+function runClustering(hearingId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Clustering…';
+  fetch('/api/hearings/' + hearingId + '/cluster', { method: 'POST' })
+    .then(function(r) {
+      if (!r.ok) {
+        return r.json().then(function(d) { throw new Error(d.error || 'Clustering failed'); });
+      }
+      location.reload();
+    })
+    .catch(function(e) {
+      btn.disabled = false;
+      btn.textContent = 'Cluster Comments';
+      alert(e.message);
+    });
 }
 </script>
 {% endblock %}

@@ -2,6 +2,8 @@ from datetime import date as date_type
 from flask import Blueprint, jsonify, request
 from app.services.hearing_service import create_hearing, get_hearing, list_hearings
 from app.services.summary_orchestrator import run_summary
+from app.services.comment_service import create_comment
+from app.services.cluster_orchestrator import run_clustering
 
 api_bp = Blueprint("api", __name__)
 
@@ -41,6 +43,33 @@ def create_hearing_route():
 
     hearing = create_hearing(title, parsed_date, transcript=transcript, agenda=agenda)
     return jsonify(hearing.to_dict()), 201
+
+
+@api_bp.route("/hearings/<int:hearing_id>/comments", methods=["POST"])
+def create_comment_route(hearing_id):
+    data = request.get_json(silent=True) or {}
+    body = data.get("body", "").strip() if isinstance(data.get("body"), str) else ""
+    if not body:
+        return jsonify({"error": "body is required"}), 400
+    try:
+        comment = create_comment(hearing_id, body)
+    except ValueError:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(comment.to_dict()), 201
+
+
+@api_bp.route("/hearings/<int:hearing_id>/cluster", methods=["POST"])
+def cluster_hearing_route(hearing_id):
+    hearing = get_hearing(hearing_id)
+    if hearing is None:
+        return jsonify({"error": "Not found"}), 404
+
+    try:
+        clusters = run_clustering(hearing_id)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    return jsonify([c.to_dict() for c in clusters]), 200
 
 
 @api_bp.route("/hearings/<int:hearing_id>/summarize", methods=["POST"])

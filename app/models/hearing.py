@@ -13,6 +13,8 @@ class Hearing(db.Model):
     youtube_video_id = db.Column(db.String(50), nullable=True, unique=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     summary = db.relationship("HearingSummary", backref="hearing", uselist=False)
+    comments = db.relationship("PublicComment", backref="hearing", lazy="dynamic")
+    clusters = db.relationship("CommentCluster", backref="hearing", lazy="dynamic")
 
     def to_dict(self):
         return {
