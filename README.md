@@ -10,8 +10,6 @@ python3 -m venv .venv && source .venv/bin/activate
 # 2. Install dependencies
 make install
 
-# 3. Seed the database with sample hearings
-make seed
 
 # 4. Start the development server
 make run
