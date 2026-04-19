@@ -18,10 +18,31 @@ def index():
 def about():
     return render_template("about.html")
 
-
 @web_bp.route("/hearings")
 def list_hearings():
-    hearings = fetch_hearings()
+    from sqlalchemy import func
+    from app import db
+    from app.models.hearing import Hearing
+    from app.models.public_comment import PublicComment
+    from app.models.comment_cluster import CommentCluster
+
+    hearings = db.session.query(Hearing).options(
+        db.joinedload(Hearing.summary)
+    ).order_by(Hearing.date.desc()).all()
+
+    comment_counts = dict(
+        db.session.query(PublicComment.hearing_id, func.count())
+        .group_by(PublicComment.hearing_id).all()
+    )
+    cluster_counts = dict(
+        db.session.query(CommentCluster.hearing_id, func.count())
+        .group_by(CommentCluster.hearing_id).all()
+    )
+
+    for h in hearings:
+        h.comment_count = comment_counts.get(h.id, 0)
+        h.cluster_count = cluster_counts.get(h.id, 0)
+
     return render_template("hearings/list.html", hearings=hearings)
 
 

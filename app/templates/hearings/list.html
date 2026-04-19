@@ -1,31 +1,70 @@
 {% extends "base.html" %}
 {% block title %}Hearings — CivicLens{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='hearings.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-  <h1>Public Hearings</h1>
-  <a class="btn" href="{{ url_for('web.new_hearing') }}">+ Submit a Hearing</a>
+<div class="hearings-header">
+  <div class="hearings-header-inner">
+    <div>
+      <div class="hearings-eyebrow">Hidalgo County</div>
+      <h1 class="hearings-title">Public Hearings</h1>
+      <p class="hearings-sub">Stay informed on the decisions shaping your community</p>
+    </div>
+    <a href="{{ url_for('web.new_hearing') }}" class="btn-submit">+ Submit a Hearing</a>
+  </div>
 </div>
+<div class="hearings-gold-bar"></div>
 
 {% if hearings %}
-<table>
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Date</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for hearing in hearings %}
-    <tr>
-      <td>{{ hearing.title }}</td>
-      <td>{{ hearing.date }}</td>
-      <td><a href="{{ url_for('web.hearing_detail', hearing_id=hearing.id) }}">View</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="hearings-grid">
+  {% for hearing in hearings %}
+  <a href="{{ url_for('web.hearing_detail', hearing_id=hearing.id) }}" class="hearing-card">
+    <div class="card-thumb">
+      {% if hearing.youtube_video_id %}
+      <img src="https://img.youtube.com/vi/{{ hearing.youtube_video_id }}/hqdefault.jpg" alt="{{ hearing.title }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+      <div class="card-thumb-fallback" style="display:none">🏛️</div>
+      {% else %}
+      <div class="card-thumb-fallback">🏛️</div>
+      {% endif %}
+      <div class="card-date-badge">{{ hearing.date }}</div>
+      <div class="play-btn">▶</div>
+    </div>
+    <div class="card-body">
+      <span class="card-tag">
+        {% if 'court' in hearing.title.lower() %}Commissioners Court
+        {% elif 'special' in hearing.title.lower() %}Special Session
+        {% else %}Public Hearing{% endif %}
+      </span>
+      <h3 class="card-title">{{ hearing.title }}</h3>
+      <p class="card-preview">
+        {% if hearing.summary %}
+          {{ hearing.summary.issue_description }}
+        {% else %}
+          Summary pending — click to view this hearing and generate an AI summary.
+        {% endif %}
+      </p>
+      <div class="card-footer">
+        <div class="card-stats">
+          <span class="card-stat">
+            <span class="card-stat-icon">💬</span>
+            {{ hearing.comment_count }} 
+          </span>
+          {% if hearing.clusters.count() > 0 %}
+          <span class="card-stat">
+            <span class="card-stat-icon">📊</span>
+            {{ hearing.cluster_count }}
+          </span>
+          {% endif %}
+        </div>
+        <span class="card-link">View →</span>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
 {% else %}
 <p class="empty-state">No hearings yet. <a href="{{ url_for('web.new_hearing') }}">Submit the first one.</a></p>
 {% endif %}

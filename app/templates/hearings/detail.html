@@ -3,8 +3,12 @@
 
 {% block content %}
 <a class="back-link" href="{{ url_for('web.list_hearings') }}">&larr; All Hearings</a>
-<h1>{{ hearing.title }}</h1>
-<p class="meta">Date: {{ hearing.date }}</p>
+<div class="detail-header">
+  <div class="detail-eyebrow">Hidalgo County · Public Hearing</div>
+  <h1 class="detail-title">{{ hearing.title }}</h1>
+  <p class="detail-date">{{ hearing.date }}</p>
+</div>
+<div class="detail-gold-bar"></div>
 
 <section class="summary-section">
   <div class="summary-header">
@@ -36,6 +40,7 @@
 </section>
 
 {% if hearing.agenda %}
+<hr class="section-divider">
 <section>
   <h2>Agenda</h2>
   <pre class="content-block">{{ hearing.agenda }}</pre>
@@ -43,6 +48,7 @@
 {% endif %}
 
 {% if hearing.transcript %}
+<hr class="section-divider">
 <section>
   <h2>Transcript</h2>
   <pre class="content-block">{{ hearing.transcript }}</pre>
@@ -53,8 +59,12 @@
 <p class="empty-state">No agenda or transcript available for this hearing.</p>
 {% endif %}
 
+<hr class="section-divider">
+
 <section class="comments-section">
-  <h2>Public Comments</h2>
+  <div class="comments-header">
+    <h2>Public Comments</h2>
+  </div>
   <form class="comment-form" method="POST" action="{{ url_for('web.submit_comment', hearing_id=hearing.id) }}">
     <label for="comment-body">Add your comment</label>
     {% if comment_error %}
@@ -67,16 +77,23 @@
   {% if comments %}
   <ul class="comment-list">
     {% for c in comments %}
-    <li class="comment-item">
+    <li class="comment-item{% if loop.index > 3 %} comment-hidden{% endif %}">
       <p class="comment-body">{{ c.body }}</p>
       <span class="comment-meta">{{ c.created_at_display }}</span>
     </li>
     {% endfor %}
   </ul>
+  {% if comments|length > 3 %}
+  <button class="show-more-btn" id="show-more-btn" onclick="showMoreComments()">
+    Show {{ comments|length - 3 }} more comment{{ 's' if comments|length - 3 != 1 else '' }}
+  </button>
+  {% endif %}
   {% else %}
   <p class="empty-state">No comments yet — be the first.</p>
   {% endif %}
 </section>
+
+<hr class="section-divider">
 
 <section class="clusters-section">
   <div class="clusters-header">
@@ -319,28 +336,24 @@ allComments.forEach(function(c) {
     }
   }
 
-  cy.on('tap', 'node[type="cluster"]', function(evt) {
-    openPanel(evt.target);
-  });
-
-  cy.on('tap', 'node[type="comment"]', function(evt) {
-    evt.stopPropagation();
-  });
-
-  cy.on('tap', function(evt) {
-    if (evt.target === cy) closePanel();
-  });
+  cy.on('tap', 'node[type="cluster"]', function(evt) { openPanel(evt.target); });
+  cy.on('tap', 'node[type="comment"]', function(evt) { evt.stopPropagation(); });
+  cy.on('tap', function(evt) { if (evt.target === cy) closePanel(); });
 
   document.getElementById('panel-close').addEventListener('click', closePanel);
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closePanel();
-  });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
 })();
 </script>
 {% endif %}
 
 <script>
+function showMoreComments() {
+  document.querySelectorAll('.comment-hidden').forEach(function(el) {
+    el.classList.remove('comment-hidden');
+  });
+  document.getElementById('show-more-btn').style.display = 'none';
+}
+
 function resummarize(hearingId, btn) {
   btn.disabled = true;
   btn.textContent = 'Running…';
