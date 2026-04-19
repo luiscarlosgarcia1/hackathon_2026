@@ -1,3 +1,4 @@
+from app.models.user import User  # noqa: F401
 from app.models.hearing import Hearing  # noqa: F401
 from app.models.hearing_summary import HearingSummary  # noqa: F401
 from app.models.comment_cluster import CommentCluster  # noqa: F401

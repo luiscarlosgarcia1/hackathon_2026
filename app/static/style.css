@@ -419,3 +419,45 @@ td a { color: #1a3a5c; }
   z-index: 999;
   white-space: pre-wrap;
 }
+/* ── Auth ── */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  background: #fff;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 2px 12px rgba(26,58,92,0.08);
+}
+
+.auth-card h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  color: #1a3a5c;
+}
+
+.auth-subtitle {
+  color: #666;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.auth-footer a {
+  color: #1a3a5c;
+  font-weight: bold;
+}
