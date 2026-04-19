@@ -18,7 +18,7 @@ Return ONLY valid JSON. No markdown, no explanation, no extra text."""
 def summarize_hearing(hearing) -> dict:
     parts = [f"Title: {hearing.title}", f"Date: {hearing.date}"]
     if hearing.transcript:
-        parts.append(f"Transcript:\n{hearing.transcript[:8000]}")
+        parts.append(f"Transcript:\n{hearing.transcript[:15000]}")
     if hearing.agenda:
         parts.append(f"Agenda:\n{hearing.agenda}")
     user_content = "\n\n".join(parts)
@@ -53,7 +53,7 @@ def summarize_hearing(hearing) -> dict:
 def extract_decision(hearing) -> str:
     parts = [f"Title: {hearing.title}", f"Date: {hearing.date}"]
     if hearing.transcript:
-        parts.append(f"Transcript:\n{hearing.transcript[:8000]}")
+        parts.append(f"Transcript:\n{hearing.transcript[:15000]}")
     if hearing.summary:
         parts.append(f"Issue: {hearing.summary.issue_description}")
         parts.append(f"Key Arguments: {hearing.summary.key_arguments}")
