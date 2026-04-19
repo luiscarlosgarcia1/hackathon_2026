@@ -10,9 +10,10 @@
   margin-right: calc(-50vw + 50%);
   width: 100vw;
   background:
-    linear-gradient(135deg, rgba(6,16,31,0.92) 0%, rgba(10,22,40,0.85) 50%, rgba(26,58,107,0.80) 100%),
-    linear-gradient(135deg, #0a1628 0%, #1a3a6b 50%, #0d2040 100%);
-
+    linear-gradient(135deg, rgba(6,16,31,0.88) 0%, rgba(10,22,40,0.80) 50%, rgba(26,58,107,0.75) 100%),
+    url('https://t4.ftcdn.net/jpg/06/36/77/03/360_F_636770389_Eg1BgSKhCtnV80fcfT9QNoIwQaw3PNZO.jpg');
+background-size: cover;
+background-position: center;
   /* SWAP THIS LINE when you have your image: */
   /* background-image: url('/static/your-image.jpg'); */
   /* background-size: cover; */
