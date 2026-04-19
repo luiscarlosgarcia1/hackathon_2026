@@ -241,3 +241,15 @@
 }
 
 .card-text { font-size: 14px; color: var(--text-mid); line-height: 1.7; }
+
+.home-page {
+  margin: -2rem -1rem;
+}
+
+.hero,
+.cta-section,
+.what-section {
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  width: 100vw;
+}
