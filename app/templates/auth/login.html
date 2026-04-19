@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Login — CivicLens{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>Welcome back</h1>
+    <p class="auth-subtitle">Sign in to CivicLens</p>
+
+    {% if error %}
+    <div class="flash flash-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('web.login') }}">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn" style="width:100%">Sign In</button>
+    </form>
+
+    <p class="auth-footer">Don't have an account? <a href="{{ url_for('web.signup') }}">Sign up</a></p>
+    <div style="text-align:center; margin-top:0.75rem;">
+  <a href="{{ url_for('web.list_hearings') }}" class="btn" style="background:#6c757d; width:100%; display:block;">
+    Continue as Guest
+  </a>
+</div>
+  </div>
+</div>
+{% endblock %}
