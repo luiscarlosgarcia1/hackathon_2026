@@ -31,6 +31,9 @@ def create_app(config):
 
 
 def _start_background_summarizer(app):
+    if app.config.get("TESTING"):
+        return
+
     def run():
         with app.app_context():
             from app.models.hearing import Hearing
