@@ -1,22 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}CivicLens{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
 </head>
 <body>
   <nav>
-    <div class="nav-inner">
-      <a class="nav-brand" href="{{ url_for('web.list_hearings') }}">CivicLens</a>
-      <div class="nav-links">
-        <a href="{{ url_for('web.list_hearings') }}">Hearings</a>
-        <a href="{{ url_for('web.new_hearing') }}">Submit a Hearing</a>
-        <a href="{{ url_for('web.login') }}">Login</a>
-      </div>
+  <div class="flag-bar">
+    <div class="flag-item">
+      <span class="flag-emoji">🇺🇸</span>
+      <span>United States of America</span>
     </div>
-  </nav>
+    <div class="flag-item">
+      <span class="flag-emoji">⭐</span>
+      <span>Hidalgo County</span>
+    </div>
+    <div class="flag-item">
+      <span>State of Texas</span>
+      <span class="flag-emoji">🤠</span>
+    </div>
+  </div>
+  <div class="nav-inner">
+    <a class="nav-brand" href="{{ url_for('web.index') }}">
+      <div class="nav-logo-icon">CL</div>
+      CivicLens
+    </a>
+    <div class="nav-links">
+      <a href="{{ url_for('web.index') }}">Home</a>
+      <a href="{{ url_for('web.list_hearings') }}">Hearings</a>
+      <a href="#">About Us</a>
+      <a href="{{ url_for('web.login') }}" class="nav-login">Login</a>
+    </div>
+  </div>
+  <div class="gold-line"></div>
+</nav>
   <main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}

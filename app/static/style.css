@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;600&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
@@ -8,35 +10,104 @@ body {
   line-height: 1.6;
 }
 
+/* ── NAV / HEADER ── */
+.flag-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 40px;
+  background: #06101f;
+  border-bottom: 1px solid rgba(201,168,76,0.3);
+}
+
+.flag-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flag-emoji { font-size: 20px; line-height: 1; }
+
 nav {
-  background: #1a3a5c;
+  background: #0a1628;
   color: #fff;
-  padding: 0.75rem 1rem;
+  padding: 0;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
 }
 
 .nav-inner {
-  max-width: 860px;
-  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 40px;
+  height: 64px;
+  max-width: 100%;
 }
 
 .nav-brand {
+  font-family: 'Playfair Display', serif;
   color: #fff;
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 700;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: #c9a84c;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0a1628;
+  flex-shrink: 0;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .nav-links a {
-  color: #cce0f5;
-  margin-left: 1.5rem;
+  color: rgba(255,255,255,0.8);
+  margin-left: 0;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
-.nav-links a:hover { color: #fff; }
+.nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+
+.nav-links a.nav-login {
+  background: #c9a84c;
+  color: #0a1628;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.nav-links a.nav-login:hover { background: #f0d080; }
+
+.gold-line {
+  height: 3px;
+  background: linear-gradient(90deg, #c9a84c 0%, #f0d080 50%, #c9a84c 100%);
+}
+
 
 .container {
   max-width: 860px;

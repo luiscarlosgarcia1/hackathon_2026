@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Home — CivicLens{% endblock %}
+
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="slides" id="slides">
+    <div class="slide slide-1">
+      <div class="slide-overlay"></div>
+      <div class="slide-bg">🏛️</div>
+      <div class="slide-content">
+        <span class="slide-tag">Hidalgo County</span>
+        <h1 class="slide-title">Commissioners Court in Session</h1>
+        <p class="slide-sub">Your county government at work — decisions that shape our community</p>
+      </div>
+    </div>
+    <div class="slide slide-2">
+      <div class="slide-overlay"></div>
+      <div class="slide-bg">⚖️</div>
+      <div class="slide-content">
+        <span class="slide-tag">Transparency</span>
+        <h1 class="slide-title">Justice & Accountability for All</h1>
+        <p class="slide-sub">Tracking how government decisions align with the voice of the people</p>
+      </div>
+    </div>
+    <div class="slide slide-3">
+      <div class="slide-overlay"></div>
+      <div class="slide-bg">🗳️</div>
+      <div class="slide-content">
+        <span class="slide-tag">Civic Engagement</span>
+        <h1 class="slide-title">Your Voice Matters</h1>
+        <p class="slide-sub">Submit public comments and join the civic conversation in Hidalgo County</p>
+      </div>
+    </div>
+    <div class="slide slide-4">
+      <div class="slide-overlay"></div>
+      <div class="slide-bg">📋</div>
+      <div class="slide-content">
+        <span class="slide-tag">AI-Powered</span>
+        <h1 class="slide-title">Smart Civic Intelligence</h1>
+        <p class="slide-sub">Powered by AI to summarize hearings, cluster opinions, and measure accountability</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="slider-arrow left" onclick="moveSlide(-1)">&#8249;</button>
+  <button class="slider-arrow right" onclick="moveSlide(1)">&#8250;</button>
+
+  <div class="slider-dots" id="dots">
+    <button class="dot active" onclick="goToSlide(0)"></button>
+    <button class="dot" onclick="goToSlide(1)"></button>
+    <button class="dot" onclick="goToSlide(2)"></button>
+    <button class="dot" onclick="goToSlide(3)"></button>
+  </div>
+</section>
+
+<section class="cta-section">
+  <a href="{{ url_for('web.list_hearings') }}" class="cta-btn">
+    View Latest Hearings <span class="arrow">→</span>
+  </a>
+  <p class="cta-message">
+    Stay informed on the latest <strong>Hidalgo County government decisions</strong>.
+    Read hearing summaries, leave public comments, and see how your government responds to community concerns.
+  </p>
+</section>
+
+<section class="what-section">
+  <p class="section-label">What We Do</p>
+  <h2 class="section-title">Civic Transparency, Powered by AI</h2>
+  <div class="cards">
+    <div class="card">
+      <span class="card-icon">📡</span>
+      <h3 class="card-title">Live Hearing Tracking</h3>
+      <p class="card-text">We pull directly from Hidalgo County's YouTube channel to bring you the latest government hearings automatically.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🤖</span>
+      <h3 class="card-title">AI Summaries</h3>
+      <p class="card-text">Every hearing is summarized by AI — key issues, stakeholders, arguments, and community impact, in plain English.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">📊</span>
+      <h3 class="card-title">Accountability Scores</h3>
+      <p class="card-text">We compare government decisions to public comments and tell you if officials are aligned, partial, or diverged from the people.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  let current = 0;
+  const total = 4;
+  let timer = setInterval(() => moveSlide(1), 4000);
+
+  function moveSlide(dir) {
+    current = (current + dir + total) % total;
+    updateSlider();
+    resetTimer();
+  }
+
+  function goToSlide(n) {
+    current = n;
+    updateSlider();
+    resetTimer();
+  }
+
+  function updateSlider() {
+    document.getElementById('slides').style.transform = `translateX(-${current * 100}%)`;
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+  }
+
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => moveSlide(1), 4000);
+  }
+</script>
+{% endblock %}
