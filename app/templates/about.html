@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}About Us — CivicLens{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="about-hero">
+  <span class="hero-tag">About CivicLens</span>
+  <h1>We Are the Voice<br>of the Community</h1>
+  <p>Four CS students from Hidalgo County who believed technology could bridge the gap between citizens and their government — so we built it.</p>
+</section>
+<div class="gold-divider"></div>
+
+<section class="photo-section">
+  <div class="photo-placeholder">
+    <span class="photo-icon">📸</span>
+    <span class="photo-label">
+      <strong>Team CivicLens</strong>
+      Group photo coming soon
+    </span>
+  </div>
+</section>
+
+<section class="mission-section">
+  <span class="section-tag">Our Mission</span>
+  <h2 class="section-title">One Community, One Voice, One Government</h2>
+  <p class="mission-text">
+    We believe that democracy works best when citizens are informed, engaged, and heard.
+    CivicLens was built to create unity between the community, their voice, and the government —
+    making it easier for residents of Hidalgo County to participate in the decisions that shape their lives.
+  </p>
+  <div class="unity-grid">
+    <div class="unity-card">
+      <span class="unity-icon">🏘️</span>
+      <div class="unity-title">Community</div>
+      <div class="unity-desc">Real people with real concerns who deserve to be heard</div>
+    </div>
+    <div class="unity-arrow">→</div>
+    <div class="unity-card gold">
+      <span class="unity-icon">🔊</span>
+      <div class="unity-title">Voice</div>
+      <div class="unity-desc">CivicLens amplifies public opinion through AI-powered tools</div>
+    </div>
+    <div class="unity-arrow">→</div>
+    <div class="unity-card">
+      <span class="unity-icon">🏛️</span>
+      <div class="unity-title">Government</div>
+      <div class="unity-desc">Leaders who should listen and be held accountable</div>
+    </div>
+  </div>
+</section>
+<div class="gold-divider"></div>
+
+<section class="what-section">
+  <div class="what-inner">
+    <span class="section-tag">What We Do</span>
+    <h2 class="section-title">Technology for Civic Good</h2>
+    <div class="what-grid">
+      <div class="what-card">
+        <span class="what-icon">📡</span>
+        <h3 class="what-title">Track Hearings</h3>
+        <p class="what-text">We automatically pull Hidalgo County government hearings from YouTube so you never miss what your elected officials are deciding.</p>
+      </div>
+      <div class="what-card">
+        <span class="what-icon">🤖</span>
+        <h3 class="what-title">AI Summaries</h3>
+        <p class="what-text">Complex government hearings are summarized by AI into plain English — so everyone can understand what's being decided, not just lawyers.</p>
+      </div>
+      <div class="what-card">
+        <span class="what-icon">📊</span>
+        <h3 class="what-title">Accountability</h3>
+        <p class="what-text">We compare government decisions to public comments and score them — aligned, partial, or diverged — so you know if your voice was heard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="team-section">
+  <span class="section-tag">Who We Are</span>
+  <h2 class="section-title">The Team Behind CivicLens</h2>
+  <p class="team-intro">
+    We are four Computer Science students from the Rio Grande Valley who care deeply about our community and decided to take a stand — using the skills we have to make government more transparent and accessible.
+  </p>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="avatar">GQ</div>
+      <div class="team-name">Gabriel Quiroga</div>
+      <div class="team-role">CS Student & Developer</div>
+    </div>
+    <div class="team-card">
+      <div class="avatar">LG</div>
+      <div class="team-name">Luis Garcia</div>
+      <div class="team-role">CS Student & Developer</div>
+    </div>
+    <div class="team-card">
+      <div class="avatar">RM</div>
+      <div class="team-name">Ryan Martinez</div>
+      <div class="team-role">CS Student & Developer</div>
+    </div>
+    <div class="team-card">
+      <div class="avatar">EP</div>
+      <div class="team-name">Emiliano Prado</div>
+      <div class="team-role">CS Student & Developer</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Ready to Make Your Voice Heard?</h2>
+  <p>Join the CivicLens community and start participating in the conversations that shape Hidalgo County.</p>
+  <a href="{{ url_for('web.list_hearings') }}" class="cta-btn">View Latest Hearings →</a>
+</section>
+{% endblock %}

@@ -14,6 +14,10 @@ web_bp = Blueprint("web", __name__)
 def index():
      return render_template("home.html")
 
+@web_bp.route("/about")
+def about():
+    return render_template("about.html")
+
 
 @web_bp.route("/hearings")
 def list_hearings():
