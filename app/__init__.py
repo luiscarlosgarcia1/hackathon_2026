@@ -19,7 +19,6 @@ def create_app(config):
 
     with app.app_context():
         from app.models import User, Hearing, HearingSummary, CommentCluster, PublicComment  # noqa: F401
-        db.create_all()
 
         from app.routes.web import web_bp
         from app.routes.api import api_bp

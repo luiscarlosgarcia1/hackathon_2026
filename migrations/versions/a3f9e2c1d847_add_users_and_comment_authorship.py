@@ -26,6 +26,7 @@ def upgrade():
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('email', name='uq_users_email'),
+        if_not_exists=True,
     )
     op.create_index('ix_users_email', 'users', ['email'], unique=True)
 
