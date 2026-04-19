@@ -9,4 +9,18 @@ Prompt to login / sign up when the user goes to submit comment.
 
 Automatically extract stuff from transcript remove the buttons
 
-login isn't working
+login isn’t working
+
+---
+
+## For Later Review (don’t touch — friends own app/)
+
+- app/ folder — all routes, models, services, templates. leave alone until team syncs
+- tests/ — test coverage unknown, scan after app/ stabilizes
+- scripts/seed.py — imports from app/models, may need updates if models change
+- migrations/ — check if versions are in sync with current models
+
+## Cleaned (root)
+
+- Procfile — was UTF-16 encoded (broken), fixed to UTF-8
+- SLICE_PROMPT.md — deleted, was a dev prompt template artifact not part of the app
