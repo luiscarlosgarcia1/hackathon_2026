@@ -25,6 +25,12 @@ def create_app(config):
         app.register_blueprint(web_bp)
         app.register_blueprint(api_bp, url_prefix="/api")
 
+        from app.auth import get_current_user
+
+        @app.context_processor
+        def inject_current_user():
+            return {"current_user": get_current_user()}
+
     _start_background_summarizer(app)
 
     return app

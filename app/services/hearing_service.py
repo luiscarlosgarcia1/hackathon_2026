@@ -23,6 +23,15 @@ def list_hearings():
     return Hearing.query.order_by(Hearing.date.desc()).all()
 
 
+def delete_hearing(hearing_id: int) -> bool:
+    hearing = db.session.get(Hearing, hearing_id)
+    if hearing is None:
+        return False
+    db.session.delete(hearing)
+    db.session.commit()
+    return True
+
+
 def _trigger_summary(hearing_id: int) -> None:
     try:
         from app.services.summary_orchestrator import run_summary

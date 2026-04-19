@@ -7,6 +7,11 @@
   <div class="detail-eyebrow">Hidalgo County · Public Hearing</div>
   <h1 class="detail-title">{{ hearing.title }}</h1>
   <p class="detail-date">{{ hearing.date }}</p>
+  {% if current_user and current_user.is_admin %}
+  <form method="POST" action="{{ url_for('web.delete_hearing_route', hearing_id=hearing.id) }}" onsubmit="return confirm('Delete this hearing and all its data?')">
+    <button type="submit" class="btn btn-danger">Delete Hearing</button>
+  </form>
+  {% endif %}
 </div>
 <div class="detail-gold-bar"></div>
 
@@ -65,6 +70,7 @@
   <div class="comments-header">
     <h2>Public Comments</h2>
   </div>
+  {% if current_user %}
   <form class="comment-form" method="POST" action="{{ url_for('web.submit_comment', hearing_id=hearing.id) }}">
     <label for="comment-body">Add your comment</label>
     {% if comment_error %}
@@ -73,13 +79,23 @@
     <textarea id="comment-body" name="body" rows="4" placeholder="Share your thoughts on this hearing…"></textarea>
     <button type="submit" class="btn">Submit</button>
   </form>
+  {% else %}
+  <p class="empty-state"><a href="{{ url_for('web.login') }}">Log in</a> to leave a comment.</p>
+  {% endif %}
 
   {% if comments %}
   <ul class="comment-list">
     {% for c in comments %}
     <li class="comment-item{% if loop.index > 3 %} comment-hidden{% endif %}">
       <p class="comment-body">{{ c.body }}</p>
-      <span class="comment-meta">{{ c.created_at_display }}</span>
+      <div class="comment-footer">
+        <span class="comment-meta">{{ c.created_at_display }}</span>
+        {% if current_user and current_user.is_admin %}
+        <form method="POST" action="{{ url_for('web.delete_comment_route', hearing_id=hearing.id, comment_id=c.id) }}" style="display:inline">
+          <button type="submit" class="btn-delete-comment">Delete</button>
+        </form>
+        {% endif %}
+      </div>
     </li>
     {% endfor %}
   </ul>
