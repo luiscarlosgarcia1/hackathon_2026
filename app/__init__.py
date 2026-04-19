@@ -18,7 +18,7 @@ def create_app(config):
     migrate.init_app(app, db)
 
     with app.app_context():
-        from app.models import Hearing, HearingSummary, CommentCluster, PublicComment  # noqa: F401
+        from app.models import User, Hearing, HearingSummary, CommentCluster, PublicComment  # noqa: F401
         db.create_all()
 
         from app.routes.web import web_bp
