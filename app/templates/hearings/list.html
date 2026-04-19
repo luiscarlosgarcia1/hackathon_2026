@@ -13,7 +13,9 @@
       <h1 class="hearings-title">Public Hearings</h1>
       <p class="hearings-sub">Stay informed on the decisions shaping your community</p>
     </div>
+    {% if current_user and current_user.is_admin %}
     <a href="{{ url_for('web.new_hearing') }}" class="btn-submit">+ Submit a Hearing</a>
+    {% endif %}
   </div>
 </div>
 <div class="hearings-gold-bar"></div>
@@ -66,6 +68,6 @@
   {% endfor %}
 </div>
 {% else %}
-<p class="empty-state">No hearings yet. <a href="{{ url_for('web.new_hearing') }}">Submit the first one.</a></p>
+<p class="empty-state">No hearings yet.{% if current_user and current_user.is_admin %} <a href="{{ url_for('web.new_hearing') }}">Submit the first one.</a>{% endif %}</p>
 {% endif %}
 {% endblock %}

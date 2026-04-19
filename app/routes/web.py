@@ -4,8 +4,10 @@ from app.services.hearing_service import (
     create_hearing,
     get_hearing,
     list_hearings as fetch_hearings,
+    delete_hearing,
 )
-from app.services.comment_service import create_comment
+from app.services.comment_service import create_comment, delete_comment
+from app.auth import login_required, admin_required
 
 web_bp = Blueprint("web", __name__)
 
@@ -76,6 +78,7 @@ def hearing_detail(hearing_id):
 
 
 @web_bp.route("/hearings/<int:hearing_id>/comments", methods=["POST"])
+@login_required
 def submit_comment(hearing_id):
     hearing = get_hearing(hearing_id)
     if hearing is None:
@@ -99,6 +102,22 @@ def submit_comment(hearing_id):
             accountability=hearing.accountability,
         )
     create_comment(hearing_id, body)
+    return redirect(url_for("web.hearing_detail", hearing_id=hearing_id))
+
+
+@web_bp.route("/hearings/<int:hearing_id>/delete", methods=["POST"])
+@admin_required
+def delete_hearing_route(hearing_id):
+    if not delete_hearing(hearing_id):
+        abort(404)
+    return redirect(url_for("web.list_hearings"))
+
+
+@web_bp.route("/hearings/<int:hearing_id>/comments/<int:comment_id>/delete", methods=["POST"])
+@admin_required
+def delete_comment_route(hearing_id, comment_id):
+    if not delete_comment(comment_id):
+        abort(404)
     return redirect(url_for("web.hearing_detail", hearing_id=hearing_id))
 
 
@@ -144,6 +163,7 @@ def logout():
 
 
 @web_bp.route("/hearings/new", methods=["GET", "POST"])
+@admin_required
 def new_hearing():
     if request.method == "GET":
         return render_template("hearings/new.html", error=None, form_data={})

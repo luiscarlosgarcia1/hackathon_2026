@@ -6,11 +6,12 @@ from app.models.hearing import Hearing
 from app.models.comment_cluster import CommentCluster
 from app.models.government_decision import GovernmentDecision
 from app.models.accountability_summary import AccountabilitySummary
-from app.services.hearing_service import create_hearing, get_hearing, list_hearings
+from app.services.hearing_service import create_hearing, get_hearing, list_hearings, delete_hearing
 from app.services.summary_orchestrator import run_summary
-from app.services.comment_service import create_comment
+from app.services.comment_service import create_comment, delete_comment
 from app.services.cluster_orchestrator import run_clustering
 from app.services.accountability_service import compare_decision_to_clusters
+from app.auth import login_required, admin_required
 
 api_bp = Blueprint("api", __name__)
 
@@ -29,6 +30,7 @@ def get_hearing_by_id(hearing_id):
 
 
 @api_bp.route("/hearings", methods=["POST"])
+@admin_required
 def create_hearing_route():
     data = request.get_json(silent=True) or {}
 
@@ -52,7 +54,24 @@ def create_hearing_route():
     return jsonify(hearing.to_dict()), 201
 
 
+@api_bp.route("/hearings/<int:hearing_id>", methods=["DELETE"])
+@admin_required
+def delete_hearing_api(hearing_id):
+    if not delete_hearing(hearing_id):
+        return jsonify({"error": "Not found"}), 404
+    return "", 204
+
+
+@api_bp.route("/hearings/<int:hearing_id>/comments/<int:comment_id>", methods=["DELETE"])
+@admin_required
+def delete_comment_api(hearing_id, comment_id):
+    if not delete_comment(comment_id):
+        return jsonify({"error": "Not found"}), 404
+    return "", 204
+
+
 @api_bp.route("/hearings/<int:hearing_id>/comments", methods=["POST"])
+@login_required
 def create_comment_route(hearing_id):
     data = request.get_json(silent=True) or {}
     body = data.get("body", "").strip() if isinstance(data.get("body"), str) else ""

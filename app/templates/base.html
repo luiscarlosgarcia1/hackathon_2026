@@ -33,7 +33,12 @@
       <a href="{{ url_for('web.index') }}">Home</a>
       <a href="{{ url_for('web.list_hearings') }}">Hearings</a>
       <a href="{{ url_for('web.about') }}">About Us</a>
+      {% if current_user %}
+      <span class="nav-user">{{ current_user.name }}{% if current_user.is_admin %} <span class="nav-role-badge">admin</span>{% endif %}</span>
+      <a href="{{ url_for('web.logout') }}" class="nav-login">Logout</a>
+      {% else %}
       <a href="{{ url_for('web.login') }}" class="nav-login">Login</a>
+      {% endif %}
     </div>
   </div>
   <div class="gold-line"></div>
