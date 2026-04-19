@@ -3,6 +3,7 @@ from app.models.comment_cluster import CommentCluster
 from app.models.public_comment import PublicComment
 from app.services.clustering_service import cluster_comments
 from app.services.hearing_service import get_hearing
+import sqlalchemy as sa
 
 
 def run_clustering(hearing_id: int) -> list[CommentCluster]:
@@ -13,19 +14,18 @@ def run_clustering(hearing_id: int) -> list[CommentCluster]:
     comments = hearing.comments
     comment_dicts = [{"id": c.id, "body": c.body} for c in comments]
 
-    # raises ValueError if < 2 comments — let caller handle
-    clusters_data = cluster_comments(comment_dicts)
+    clusters_data = cluster_comments(comment_dicts)  # raises ValueError if < 2
 
     try:
-        # Full replace: delete existing clusters for this hearing
-        CommentCluster.query.filter_by(hearing_id=hearing_id).delete()
+        # Modern SQLAlchemy 2.x style delete
+        db.session.execute(
+            sa.delete(CommentCluster).where(CommentCluster.hearing_id == hearing_id)
+        )
 
-        # Null out cluster_id on all comments so FK constraint is satisfied
         for comment in comments:
             comment.cluster_id = None
         db.session.flush()
 
-        # Insert new clusters and assign comments
         saved_clusters = []
         comment_index = {c.id: c for c in comments}
 
@@ -36,7 +36,7 @@ def run_clustering(hearing_id: int) -> list[CommentCluster]:
                 description=cluster_data["description"],
             )
             db.session.add(cluster)
-            db.session.flush()  # get cluster.id
+            db.session.flush()
 
             for cid in cluster_data["comment_ids"]:
                 comment_index[cid].cluster_id = cluster.id

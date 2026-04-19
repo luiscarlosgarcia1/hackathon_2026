@@ -21,19 +21,29 @@ def list_hearings():
     return render_template("hearings/list.html", hearings=hearings)
 
 
+def _format_comments(comments):
+    for c in comments:
+        c.created_at_display = c.created_at.strftime('%b %d, %Y at %I:%M %p').replace(' 0', ' ')
+    return comments
+
+
 @web_bp.route("/hearings/<int:hearing_id>")
 def hearing_detail(hearing_id):
     hearing = get_hearing(hearing_id)
     if hearing is None:
         abort(404)
-    comments = hearing.comments.order_by("created_at").all()
+    comments = _format_comments(hearing.comments.order_by("created_at").all())
+    comments_data = [c.to_dict() for c in comments]
     clusters = hearing.clusters.all()
+    clusters_data = [c.to_dict(include_comments=True) for c in clusters]
     return render_template(
         "hearings/detail.html",
         hearing=hearing,
         summary=hearing.summary,
         comments=comments,
+        comments_data=comments_data,
         clusters=clusters,
+        clusters_data=clusters_data,
         comment_error=None,
         decision=hearing.decision,
         accountability=hearing.accountability,
@@ -47,14 +57,18 @@ def submit_comment(hearing_id):
         abort(404)
     body = request.form.get("body", "").strip()
     if not body:
-        comments = hearing.comments.order_by("created_at").all()
+        comments = _format_comments(hearing.comments.order_by("created_at").all())
+        comments_data = [c.to_dict() for c in comments]
         clusters = hearing.clusters.all()
+        clusters_data = [c.to_dict(include_comments=True) for c in clusters]
         return render_template(
             "hearings/detail.html",
             hearing=hearing,
             summary=hearing.summary,
             comments=comments,
+            comments_data=comments_data,
             clusters=clusters,
+            clusters_data=clusters_data,
             comment_error="Comment cannot be empty.",
             decision=hearing.decision,
             accountability=hearing.accountability,

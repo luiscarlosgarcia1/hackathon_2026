@@ -1,10 +1,9 @@
 import json
 import os
 
-from openai import OpenAI
+from groq import Groq
 
-ACCOUNTABILITY_MODEL = os.environ.get("ACCOUNTABILITY_MODEL", "llama3.2")
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+ACCOUNTABILITY_MODEL = os.environ.get("ACCOUNTABILITY_MODEL", "llama-3.3-70b-versatile")
 
 VALID_ALIGNMENTS = {"aligned", "partial", "diverged"}
 
@@ -26,11 +25,6 @@ Return ONLY valid JSON. No markdown, no explanation, no extra text."""
 def compare_decision_to_clusters(
     decision_text: str, clusters: list[dict], summary: dict | None
 ) -> dict:
-    """
-    clusters: list of {name, description, comment_count}
-    summary:  {issue_description, key_arguments, community_impact} or None
-    returns:  {alignment: "aligned"|"partial"|"diverged", reasoning: str}
-    """
     parts = [f"Government Decision:\n{decision_text}"]
 
     cluster_lines = []
@@ -52,13 +46,14 @@ def compare_decision_to_clusters(
 
     user_content = "\n\n".join(parts)
 
-    client = OpenAI(base_url=OLLAMA_BASE_URL, api_key="ollama")
+    client = Groq(api_key=os.environ["GROQ_API_KEY"])
     response = client.chat.completions.create(
         model=ACCOUNTABILITY_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_content},
         ],
+        response_format={"type": "json_object"},
     )
 
     raw = response.choices[0].message.content or ""

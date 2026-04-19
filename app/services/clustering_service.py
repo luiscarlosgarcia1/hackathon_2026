@@ -1,10 +1,8 @@
 import json
 import os
+from groq import Groq
 
-from openai import OpenAI
-
-CLUSTERING_MODEL = os.environ.get("CLUSTERING_MODEL", os.environ.get("SUMMARIZATION_MODEL", "llama3.2"))
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+CLUSTERING_MODEL = os.environ.get("CLUSTERING_MODEL", "llama-3.3-70b-versatile")
 
 SYSTEM_PROMPT = """You are a civic-affairs analyst. Given a list of public comments (each with an id and body), group them into thematic clusters.
 
@@ -25,19 +23,23 @@ def cluster_comments(comments: list) -> list[dict]:
 
     user_content = json.dumps(comments, ensure_ascii=False)
 
-    client = OpenAI(base_url=OLLAMA_BASE_URL, api_key="ollama")
+    client = Groq(api_key=os.environ["GROQ_API_KEY"])
     response = client.chat.completions.create(
         model=CLUSTERING_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_content},
         ],
+        response_format={"type": "json_object"},  # Groq supports this — forces JSON
     )
 
     raw = response.choices[0].message.content or ""
 
     try:
         result = json.loads(raw)
+        # Groq json_object mode returns a dict — unwrap if needed
+        if isinstance(result, dict):
+            result = result.get("clusters") or next(iter(result.values()), result)
     except json.JSONDecodeError as exc:
         raise ValueError(f"cluster_comments: unparseable response: {raw!r}") from exc
 

@@ -69,7 +69,7 @@
     {% for c in comments %}
     <li class="comment-item">
       <p class="comment-body">{{ c.body }}</p>
-      <span class="comment-meta">{{ c.created_at.strftime('%b %-d, %Y at %-I:%M %p') }}</span>
+      <span class="comment-meta">{{ c.created_at_display }}</span>
     </li>
     {% endfor %}
   </ul>
@@ -141,12 +141,12 @@
 </section>
 
 <script>
-var CLUSTER_DATA = {{ clusters | map(attribute='to_dict') | list | tojson }};
+var CLUSTER_DATA = {{ clusters_data | tojson }};
 {% if clusters %}
 CLUSTER_DATA.forEach(function(cl) { cl.comments = []; });
 var clusterMap = {};
 CLUSTER_DATA.forEach(function(cl) { clusterMap[cl.id] = cl; });
-var allComments = {{ comments | map(attribute='to_dict') | list | tojson }};
+var allComments = {{ comments_data | tojson }};
 allComments.forEach(function(c) {
   if (c.cluster_id && clusterMap[c.cluster_id]) {
     clusterMap[c.cluster_id].comments.push(c);
