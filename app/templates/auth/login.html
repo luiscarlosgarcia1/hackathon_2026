@@ -1,11 +1,31 @@
 {% extends "base.html" %}
 {% block title %}Login — CivicLens{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="auth-container">
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-icon">CL</div>
+      <span class="brand-name">CivicLens</span>
+    </div>
+    <h2 class="auth-tagline">Your Voice.<br>Your <span>Government.</span><br>One Platform.</h2>
+    <p class="auth-desc">Join thousands of Hidalgo County residents using CivicLens to stay informed, submit comments, and hold their government accountable.</p>
+    <div class="auth-badges">
+      <div class="auth-badge"><div class="badge-dot"></div>Track government hearings in real time</div>
+      <div class="auth-badge"><div class="badge-dot"></div>Submit public comments on any hearing</div>
+      <div class="auth-badge"><div class="badge-dot"></div>See if your government is listening</div>
+    </div>
+  </div>
+
   <div class="auth-card">
-    <h1>Welcome back</h1>
-    <p class="auth-subtitle">Sign in to CivicLens</p>
+    <div class="gold-bar"></div>
+    <div class="card-eyebrow">Welcome Back</div>
+    <h1>Sign in to CivicLens</h1>
+    <p class="auth-subtitle">Your civic voice awaits</p>
 
     {% if error %}
     <div class="flash flash-error">{{ error }}</div>
@@ -13,22 +33,19 @@
 
     <form method="POST" action="{{ url_for('web.login') }}">
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="email">Email Address</label>
         <input type="email" id="email" name="email" required placeholder="you@example.com">
       </div>
       <div class="form-group">
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required placeholder="••••••••">
       </div>
-      <button type="submit" class="btn" style="width:100%">Sign In</button>
+      <button type="submit" class="btn-primary">Sign In</button>
     </form>
 
+    <div class="divider">or</div>
+    <a href="{{ url_for('web.list_hearings') }}" class="btn-guest">Continue as Guest</a>
     <p class="auth-footer">Don't have an account? <a href="{{ url_for('web.signup') }}">Sign up</a></p>
-    <div style="text-align:center; margin-top:0.75rem;">
-  <a href="{{ url_for('web.list_hearings') }}" class="btn" style="background:#6c757d; width:100%; display:block;">
-    Continue as Guest
-  </a>
-</div>
   </div>
 </div>
 {% endblock %}
