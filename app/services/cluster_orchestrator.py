@@ -5,7 +5,6 @@ from app.services.clustering_service import cluster_comments
 from app.services.hearing_service import get_hearing
 import sqlalchemy as sa
 
-
 def run_clustering(hearing_id: int) -> list[CommentCluster]:
     hearing = get_hearing(hearing_id)
     if hearing is None:
@@ -14,16 +13,21 @@ def run_clustering(hearing_id: int) -> list[CommentCluster]:
     comments = hearing.comments
     comment_dicts = [{"id": c.id, "body": c.body} for c in comments]
 
-    clusters_data = cluster_comments(comment_dicts)  # raises ValueError if < 2
+    clusters_data = cluster_comments(comment_dicts)
 
     try:
-        # Modern SQLAlchemy 2.x style delete
+        # NULL out cluster_id on comments FIRST before deleting clusters
+        db.session.execute(
+            sa.update(PublicComment)
+            .where(PublicComment.hearing_id == hearing_id)
+            .values(cluster_id=None)
+        )
+        db.session.flush()
+
+        # Now safe to delete clusters
         db.session.execute(
             sa.delete(CommentCluster).where(CommentCluster.hearing_id == hearing_id)
         )
-
-        for comment in comments:
-            comment.cluster_id = None
         db.session.flush()
 
         saved_clusters = []
