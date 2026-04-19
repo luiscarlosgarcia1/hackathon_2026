@@ -12,7 +12,7 @@ web_bp = Blueprint("web", __name__)
 
 @web_bp.route("/")
 def index():
-    return redirect(url_for("web.list_hearings"))
+     return render_template("home.html")
 
 
 @web_bp.route("/hearings")
