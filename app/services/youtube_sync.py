@@ -10,33 +10,38 @@ load_dotenv()
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 CHANNEL_ID = "UC6TaYtcc4hbJPaXt6SHmyyQ"
-YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/search"
 
 print("youtube_sync file is loading")
 
-
 def get_channel_videos(max_results=15):
-    params = {
-        "key": YOUTUBE_API_KEY,
-        "channelId": CHANNEL_ID,
-        "part": "snippet",
-        "order": "date",
-        "type": "video",
-        "maxResults": max_results,
-    }
-    response = requests.get(YOUTUBE_API_URL, params=params)
-    data = response.json()
+    channel_resp = requests.get(
+        "https://www.googleapis.com/youtube/v3/channels",
+        params={
+            "key": YOUTUBE_API_KEY,
+            "id": CHANNEL_ID,
+            "part": "contentDetails",
+        }
+    ).json()
 
-    if "error" in data:
-        print(f"YouTube API error: {data['error']['message']}")
-        return []
+    uploads_playlist_id = channel_resp["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+    
+    playlist_resp = requests.get(
+        "https://www.googleapis.com/youtube/v3/playlistItems",
+        params={
+            "key": YOUTUBE_API_KEY,
+            "playlistId": uploads_playlist_id,
+            "part": "snippet",
+            "maxResults": max_results,
+        }
+    ).json()
 
     videos = []
-    for item in data.get("items", []):
-        video_id = item["id"]["videoId"]
-        title = item["snippet"]["title"]
+    for item in playlist_resp.get("items", []):
+        snippet = item["snippet"]
+        video_id = snippet["resourceId"]["videoId"]
+        title = snippet["title"]
         published_at = datetime.fromisoformat(
-            item["snippet"]["publishedAt"].replace("Z", "+00:00")
+            snippet["publishedAt"].replace("Z", "+00:00")
         ).date()
         videos.append({
             "video_id": video_id,
@@ -51,6 +56,8 @@ def sync_hidalgo_videos():
     print("FUNCTION EXISTS")
     videos = get_channel_videos(max_results=15)
     print(f"Videos found: {len(videos)}")
+    for v in videos:
+        print(f"  Playlist: {v['title']} | {v['video_id']}")
     new_count = 0
 
     for video in videos:
