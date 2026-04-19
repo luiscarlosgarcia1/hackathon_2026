@@ -104,21 +104,17 @@
 <div id="cy-tooltip" class="cy-tooltip" style="display:none"></div>
 
 <section class="decision-section dark-panel">
-  <h2>Government Decision</h2>
-  <form id="decision-form">
-    <div class="decision-form-body">
-      <label for="decision-text">Decision text</label>
-      <textarea id="decision-text" rows="4" placeholder="Enter the government's final decision…">{{ decision.decision_text if decision else '' }}</textarea>
-      <div class="decision-form-row">
-        <label for="decision-date">Decision date <span class="decision-date-hint">(optional)</span></label>
-        <input type="date" id="decision-date" value="{{ decision.decision_date if decision and decision.decision_date else '' }}">
-      </div>
-    </div>
-    <div class="decision-form-footer">
-      <button type="submit" class="btn btn-sm">Save Decision</button>
-      <span id="decision-status" class="decision-status"></span>
-    </div>
-  </form>
+  <div class="clusters-header">
+    <h2>Government Decision</h2>
+    <button class="btn btn-sm" onclick="extractDecision({{ hearing.id }}, this)">Extract from Transcript</button>
+  </div>
+  <div id="decision-result">
+    {% if decision %}
+    <p id="decision-text-display">{{ decision.decision_text }}</p>
+    {% else %}
+    <p class="empty-state" id="decision-text-display">No decision extracted yet — click Extract from Transcript.</p>
+    {% endif %}
+  </div>
 </section>
 
 <section class="accountability-section dark-panel">
@@ -353,53 +349,38 @@ function resummarize(hearingId, btn) {
     .catch(function() { btn.disabled = false; btn.textContent = 'Re-summarize'; });
 }
 
-document.getElementById('decision-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  var hearingId = {{ hearing.id }};
-  var text = document.getElementById('decision-text').value.trim();
-  var dateVal = document.getElementById('decision-date').value;
-  var statusEl = document.getElementById('decision-status');
-  var btn = this.querySelector('button[type="submit"]');
-  if (!text) { statusEl.textContent = 'Decision text is required.'; statusEl.className = 'decision-status decision-status--error'; return; }
+function extractDecision(hearingId, btn) {
   btn.disabled = true;
-  btn.textContent = 'Saving…';
-  statusEl.textContent = '';
-  var body = { decision_text: text };
-  if (dateVal) body.decision_date = dateVal;
-  fetch('/api/hearings/' + hearingId + '/decision', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  })
-  .then(function(r) {
-    if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Save failed'); });
-    return r.json();
-  })
-  .then(function() {
-    btn.disabled = false;
-    btn.textContent = 'Save Decision';
-    statusEl.textContent = 'Saved.';
-    statusEl.className = 'decision-status decision-status--ok';
-    var runBtn = document.getElementById('run-accountability-btn');
-    if (!runBtn) {
-      var header = document.querySelector('.accountability-header');
-      var newBtn = document.createElement('button');
-      newBtn.className = 'btn btn-sm';
-      newBtn.id = 'run-accountability-btn';
-      newBtn.textContent = 'Run Accountability Analysis';
-      newBtn.onclick = function() { runAccountability(hearingId, newBtn); };
-      header.appendChild(newBtn);
-      var emptyState = document.querySelector('#accountability-result .empty-state');
-      if (emptyState) emptyState.textContent = 'No analysis yet — click Run Accountability Analysis.';
-    }
-  })
-  .catch(function(err) {
-    btn.disabled = false;
-    btn.textContent = 'Save Decision';
-    statusEl.textContent = err.message;
-    statusEl.className = 'decision-status decision-status--error';
-  });
-});
+  btn.textContent = 'Extracting…';
+  fetch('/api/hearings/' + hearingId + '/extract-decision', { method: 'POST' })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Failed'); });
+      return r.json();
+    })
+    .then(function(data) {
+      btn.disabled = false;
+      btn.textContent = 'Extract from Transcript';
+      document.getElementById('decision-text-display').textContent = data.decision_text;
+      document.getElementById('decision-text-display').classList.remove('empty-state');
+      var runBtn = document.getElementById('run-accountability-btn');
+      if (!runBtn) {
+        var header = document.querySelector('.accountability-header');
+        var newBtn = document.createElement('button');
+        newBtn.className = 'btn btn-sm';
+        newBtn.id = 'run-accountability-btn';
+        newBtn.textContent = 'Run Accountability Analysis';
+        newBtn.onclick = function() { runAccountability(hearingId, newBtn); };
+        header.appendChild(newBtn);
+        var emptyState = document.querySelector('#accountability-result .empty-state');
+        if (emptyState) emptyState.textContent = 'No analysis yet — click Run Accountability Analysis.';
+      }
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = 'Extract from Transcript';
+      alert(err.message);
+    });
+}
 
 function runAccountability(hearingId, btn) {
   btn.disabled = true;

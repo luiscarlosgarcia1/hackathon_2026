@@ -203,3 +203,24 @@ def get_accountability_route(hearing_id):
         return jsonify({"error": "Accountability analysis not yet run"}), 404
 
     return jsonify(accountability.to_dict()), 200
+
+@api_bp.route("/hearings/<int:hearing_id>/extract-decision", methods=["POST"])
+def extract_decision_route(hearing_id):
+    hearing = get_hearing(hearing_id)
+    if hearing is None:
+        return jsonify({"error": "Not found"}), 404
+    try:
+        from app.services.summarization_service import extract_decision
+        decision_text = extract_decision(hearing)
+        print(f"DEBUG decision_text: {decision_text!r}")
+        decision = db.session.query(GovernmentDecision).filter_by(hearing_id=hearing_id).first()
+        if decision is None:
+            decision = GovernmentDecision(hearing_id=hearing_id)
+            db.session.add(decision)
+        decision.decision_text = decision_text
+        db.session.commit()
+        return jsonify({"decision_text": decision_text}), 200
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500

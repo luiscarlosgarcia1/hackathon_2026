@@ -49,3 +49,26 @@ def summarize_hearing(hearing) -> dict:
         raise ValueError(f"summarize_hearing: response missing keys {missing}: {raw!r}")
 
     return {k: result[k] for k in required}
+
+def extract_decision(hearing) -> str:
+    parts = [f"Title: {hearing.title}", f"Date: {hearing.date}"]
+    if hearing.transcript:
+        parts.append(f"Transcript:\n{hearing.transcript[:8000]}")
+    if hearing.summary:
+        parts.append(f"Issue: {hearing.summary.issue_description}")
+        parts.append(f"Key Arguments: {hearing.summary.key_arguments}")
+        parts.append(f"Community Impact: {hearing.summary.community_impact}")
+    user_content = "\n\n".join(parts)
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "system",
+                "content": """You are a civic-affairs analyst. Based on the hearing title, date, and any available summary, write exactly 2 sentences describing what the government likely decided or what the outcome of this hearing was.
+No markdown, no JSON, no extra text."""
+            },
+            {"role": "user", "content": user_content},
+        ],
+    )
+    return response.choices[0].message.content.strip()
