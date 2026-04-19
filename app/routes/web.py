@@ -1,5 +1,5 @@
 from datetime import date as date_type
-from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask import Blueprint, render_template, request, redirect, url_for, abort, session
 from app.services.hearing_service import (
     create_hearing,
     get_hearing,
@@ -75,6 +75,47 @@ def submit_comment(hearing_id):
         )
     create_comment(hearing_id, body)
     return redirect(url_for("web.hearing_detail", hearing_id=hearing_id))
+
+
+@web_bp.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("auth/login.html", error=None)
+    from app.models.user import User
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+    user = User.query.filter_by(email=email).first()
+    if not user or not user.check_password(password):
+        return render_template("auth/login.html", error="Invalid email or password.")
+    session["user_id"] = user.id
+    return redirect(url_for("web.list_hearings"))
+
+
+@web_bp.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "GET":
+        return render_template("auth/signup.html", error=None)
+    from app import db
+    from app.models.user import User
+    name = request.form.get("full_name", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+    if not name or not email or not password:
+        return render_template("auth/signup.html", error="All fields are required.")
+    if User.query.filter_by(email=email).first():
+        return render_template("auth/signup.html", error="An account with that email already exists.")
+    user = User(email=email, name=name)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+    session["user_id"] = user.id
+    return redirect(url_for("web.list_hearings"))
+
+
+@web_bp.route("/logout")
+def logout():
+    session.pop("user_id", None)
+    return redirect(url_for("web.list_hearings"))
 
 
 @web_bp.route("/hearings/new", methods=["GET", "POST"])
