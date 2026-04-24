@@ -10,6 +10,7 @@ def seed_admin():
     """Create the admin user (admin@admin.com / admin123)."""
     from app import db
     from app.models.user import User
+    db.create_all()
     existing = User.query.filter_by(email="admin@admin.com").first()
     if existing:
         click.echo("Admin user already exists.")

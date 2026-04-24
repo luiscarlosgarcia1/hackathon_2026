@@ -1,4 +1,4 @@
-.PHONY: install run test clean
+.PHONY: install run test clean seed
 
 install:
 	pip install -r requirements.txt
@@ -8,6 +8,9 @@ run:
 
 test:
 	pytest tests/ -v
+
+seed:
+	FLASK_APP=run.py flask seed-admin
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
