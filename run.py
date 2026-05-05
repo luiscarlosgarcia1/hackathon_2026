@@ -3,7 +3,6 @@ import os
 from app import create_app
 from config import DevelopmentConfig, Config
 
-# Use ProductionConfig on Railway, DevelopmentConfig locally
 config = Config if os.environ.get("RAILWAY_ENVIRONMENT") else DevelopmentConfig
 app = create_app(config)
 
@@ -23,6 +22,13 @@ def seed_admin():
     db.session.add(user)
     db.session.commit()
     click.echo("Admin user created: admin@admin.com / admin123")
+
+
+@app.cli.command("sync-youtube")
+def sync_youtube():
+    """Sync hearings from YouTube channel."""
+    from app.services.youtube_sync import sync_hidalgo_videos
+    sync_hidalgo_videos()
 
 
 if __name__ == "__main__":
