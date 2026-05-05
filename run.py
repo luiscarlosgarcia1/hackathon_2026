@@ -1,8 +1,11 @@
 import click
+import os
 from app import create_app
-from config import DevelopmentConfig
+from config import DevelopmentConfig, Config
 
-app = create_app(DevelopmentConfig)
+# Use ProductionConfig on Railway, DevelopmentConfig locally
+config = Config if os.environ.get("RAILWAY_ENVIRONMENT") else DevelopmentConfig
+app = create_app(config)
 
 
 @app.cli.command("seed-admin")
