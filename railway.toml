@@ -1,3 +1,2 @@
 [deploy]
-releaseCommand = "flask --app run:app db upgrade"
-startCommand = "gunicorn run:app --bind 0.0.0.0:$PORT"
+startCommand = "flask --app run:app db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
