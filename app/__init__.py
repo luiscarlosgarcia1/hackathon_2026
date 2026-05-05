@@ -1,5 +1,6 @@
 import logging
 import threading
+import os
 
 from flask import Flask
 from flask_migrate import Migrate
@@ -31,7 +32,8 @@ def create_app(config):
         def inject_current_user():
             return {"current_user": get_current_user()}
 
-    _start_background_summarizer(app)
+    if os.getenv("RUN_WORKER") == "true":
+        _start_background_summarizer(app)
 
     return app
 
@@ -39,26 +41,40 @@ def create_app(config):
 def _start_background_summarizer(app):
     if app.config.get("TESTING"):
         return
-
     def run():
-        with app.app_context():
-            from app.models.hearing import Hearing
-            from app.models.hearing_summary import HearingSummary
-            from app.services.summary_orchestrator import run_summary
+        import time
+        from sqlalchemy.exc import OperationalError
 
-            unsummarized = (
-                db.session.query(Hearing)
-                .outerjoin(HearingSummary, Hearing.id == HearingSummary.hearing_id)
-                .filter(HearingSummary.id.is_(None))
-                .all()
-            )
+        time.sleep(15)  # give Railway DB time to fully boot
+
+        with app.app_context():
+            try:
+                from app.models.hearing import Hearing
+                from app.models.hearing_summary import HearingSummary
+                from app.services.summary_orchestrator import run_summary
+
+                try:
+                    unsummarized = (
+                        db.session.query(Hearing)
+                        .outerjoin(HearingSummary, Hearing.id == HearingSummary.hearing_id)
+                        .filter(HearingSummary.id.is_(None))
+                        .all()
+                    )
+                except Exception as e:
+                    print("DB query failed (likely migrations not ready):", e)
+                    return
+
+            except Exception as e:
+                print("Import failure:", e)
+                return
 
             for h in unsummarized:
                 try:
-                    logger.info("Background summarizer: generating summary for hearing %d", h.id)
                     run_summary(h.id)
-                except Exception:
-                    logger.exception("Background summarizer: failed for hearing %d", h.id)
+                except Exception as e:
+                    print("Failed summary:", e)
 
+    import threading
     t = threading.Thread(target=run, daemon=True)
     t.start()
+
