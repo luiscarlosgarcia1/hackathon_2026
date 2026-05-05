@@ -1,2 +1,2 @@
 [deploy]
-startCommand = "flask --app run:app db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
+startCommand = "flask --app run:app sync-youtube && flask --app run:app db upgrade && gunicorn run:app --bind 0.0.0.0:$PORT"
